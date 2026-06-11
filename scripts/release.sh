@@ -1,15 +1,11 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-VERSION=$(grep '^version' extension.toml | head -1 | sed 's/.*"\(.*\)"/\1/')
-TAG="v$VERSION"
-
-if git rev-parse "$TAG" >/dev/null 2>&1; then
-  echo "Error: Tag $TAG already exists"
+if command -v node >/dev/null 2>&1; then
+  node scripts/release.mjs "$@"
+elif command -v node.exe >/dev/null 2>&1; then
+  node.exe scripts/release.mjs "$@"
+else
+  echo "Error: node is required to run the release script" >&2
   exit 1
 fi
-
-echo "Creating tag $TAG..."
-git tag "$TAG"
-git push origin "$TAG"
-echo "Done! Tag $TAG pushed. GitHub Action will create release and PR."
