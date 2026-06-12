@@ -36,3 +36,24 @@ MyFunc() {
 ; Nested-looking block comments (AHK doesn't nest)
 /* outer /* inner */ still comment */
 ; <- comment
+
+OpenFolder(){
+	projectPath:=""
+
+	Loop, Files, %projectPath%/*, D
+	{
+        Loop, Files, %A_LoopFileLongPath%/*, D
+;       ^^^^ keyword
+		{
+			if(A_LoopFileName=="release"){
+                run,explorer "%A_LoopFileLongPath%"
+;               ^^^ function.builtin
+                Exit
+;               ^^^^ keyword
+			}
+		}
+	}
+}
+
+/* xxx */
+; <- comment

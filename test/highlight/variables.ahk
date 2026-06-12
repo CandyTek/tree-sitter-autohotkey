@@ -62,3 +62,16 @@ try {
 ;       ^ variable.parameter
     x := e
 }
+
+var1:=1
+var2:=2
+
+u := (var1==1
+ || var2==2) ? ";" : "" ; Union
+;   ^^^^ variable
+
+Text =
+; <- variable
+(
+xxx
+)

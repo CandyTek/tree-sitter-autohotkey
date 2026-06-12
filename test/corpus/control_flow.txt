@@ -473,6 +473,61 @@ loop, parse, text
       right: (identifier))))
 
 ================================================================================
+Nested uppercase Loop Files with trailing block comment
+================================================================================
+
+OpenFolder(){
+    projectPath := ""
+
+    Loop, Files, %projectPath%/*, D
+    {
+        Loop, Files, %A_LoopFileLongPath%/*, D
+        {
+            if (A_LoopFileName == "release") {
+                run, explorer "%A_LoopFileLongPath%"
+                Exit
+            }
+        }
+    }
+}
+
+/* xxx */
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_definition
+    name: (identifier)
+    body: (block
+      (assignment_expression
+        left: (identifier)
+        right: (string))
+      (loop_statement
+        type: (loop_type)
+        arguments: (loop_arguments)
+        body: (statement_block
+          (block
+            (loop_statement
+              type: (loop_type)
+              arguments: (loop_arguments)
+              body: (statement_block
+                (block
+                  (if_statement
+                    condition: (parenthesized_expression
+                      (binary_expression
+                        left: (identifier)
+                        right: (string)))
+                    consequence: (statement_block
+                      (block
+                        (command
+                          name: (identifier)
+                          (command_arguments
+                            (identifier)
+                            (string)))
+                        (identifier))))))))))))
+      (block_comment))
+
+================================================================================
 If with chained AND conditions
 ================================================================================
 

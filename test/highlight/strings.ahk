@@ -55,3 +55,20 @@ MsgBox("Hello World")
 
 result := Format("Value: {1}", x)
 ;                ^^^^^^^^^^^^ string
+
+if !(A_IsAdmin || InStr(DllCall("GetCommandLine", "str"), ".exe"" /r"))
+    Run % "*RunAs " (s:=A_IsCompiled ? "" : A_AhkPath " /r ") Chr(34) A_ScriptFullPath Chr(34) (s ? "" : " /r")
+;         ^^^^^^^^^                                   ^^^^^^                                             ^^^^^ string
+
+FileAppend,
+(
+xxxxxxxx
+), %cfg%
+; <- string
+
+MsgBox,
+(
+done
+position: %cfg%
+)
+; <- string

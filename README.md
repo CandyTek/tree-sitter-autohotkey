@@ -130,8 +130,7 @@ After modifying `grammar.js` or query files:
 2. Run `npm run test` to verify changes
 3. Commit and push to GitHub
 4. Update `rev` in `extension.toml` to the new commit hash
-5. Delete the `grammars/` folder (Zed's cache)
-6. Reinstall the dev extension in Zed
+5. Reinstall the dev extension in Zed so it refreshes the grammar checkout
 
 See [TREE_SITTER_NOTES.md](TREE_SITTER_NOTES.md) for technical details, debugging tips, and technical lessons learned.
 

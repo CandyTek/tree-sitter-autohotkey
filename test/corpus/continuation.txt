@@ -10,7 +10,7 @@ var := (
 --------------------------------------------------------------------------------
 
 (source_file
-  (assignment_expression
+  (continuation_assignment_expression
     left: (identifier)
     right: (continuation_section)))
 
@@ -26,7 +26,7 @@ sql := (LTrim
 --------------------------------------------------------------------------------
 
 (source_file
-  (assignment_expression
+  (continuation_assignment_expression
     left: (identifier)
     right: (continuation_section)))
 
@@ -42,7 +42,7 @@ query := (
 --------------------------------------------------------------------------------
 
 (source_file
-  (assignment_expression
+  (continuation_assignment_expression
     left: (identifier)
     right: (continuation_section)))
 
@@ -56,6 +56,110 @@ empty := (
 --------------------------------------------------------------------------------
 
 (source_file
+  (continuation_assignment_expression
+    left: (identifier)
+    right: (continuation_section)))
+
+================================================================================
+Legacy assignment continuation with percent option
+================================================================================
+
+code_part =
+(% Join`r`n
+  AccChildren(Acc) {
+    Return ""
+  }
+)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (legacy_assignment_expression
+    left: (identifier)
+    right: (continuation_section)))
+
+================================================================================
+Multiline ternary is not continuation
+================================================================================
+
+codeType := (A_ThisLabel = "TempMenu_CopyCodeSingle")     ? "single"
+  : (A_ThisLabel = "TempMenu_CopyCodeParameters") ? "parameters"
+  : "full"
+
+--------------------------------------------------------------------------------
+
+(source_file
   (assignment_expression
+    left: (identifier)
+    right: (ternary_expression
+      condition: (parenthesized_expression
+        (binary_expression
+          left: (identifier)
+          right: (string)))
+      consequence: (string)
+      alternative: (ternary_expression
+        condition: (parenthesized_expression
+          (binary_expression
+            left: (identifier)
+            right: (string)))
+        consequence: (string)
+        alternative: (string)))))
+
+================================================================================
+Legacy assignment continuation with Unicode identifier
+================================================================================
+
+中文 =
+(LTrim
+  line one
+  line two
+)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (legacy_assignment_expression
+    left: (identifier)
+    right: (continuation_section)))
+
+================================================================================
+Multiline ternary with inline comment is not continuation
+================================================================================
+
+var1:=1
+var2:=2
+
+u := (var1==1
+ || var2==2) ? ";" : "" ; Union
+
+Text =
+(
+xxx
+)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_expression
+    left: (identifier)
+    right: (number))
+  (assignment_expression
+    left: (identifier)
+    right: (number))
+  (assignment_expression
+    left: (identifier)
+    right: (ternary_expression
+      condition: (parenthesized_expression
+        (binary_expression
+          left: (binary_expression
+            left: (identifier)
+            right: (number))
+          right: (binary_expression
+            left: (identifier)
+            right: (number))))
+      consequence: (string)
+      alternative: (string)))
+  (comment)
+  (legacy_assignment_expression
     left: (identifier)
     right: (continuation_section)))

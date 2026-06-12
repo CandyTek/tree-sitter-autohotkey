@@ -72,3 +72,22 @@ Multi-line doc comment
 
 (source_file
   (doc_comment))
+
+================================================================================
+Block comments do not swallow following function and comment
+================================================================================
+
+/* block comment */
+
+MyFunc() {
+}
+
+/* block comment */
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (block_comment)
+  (function_definition
+    name: (identifier))
+  (block_comment))

@@ -68,6 +68,10 @@
           "named": true
         },
         {
+          "type": "quoted_continuation_string",
+          "named": true
+        },
+        {
           "type": "string",
           "named": true
         },
@@ -156,6 +160,10 @@
         },
         {
           "type": "parenthesized_expression",
+          "named": true
+        },
+        {
+          "type": "quoted_continuation_string",
           "named": true
         },
         {
@@ -302,6 +310,10 @@
             "named": true
           },
           {
+            "type": "quoted_continuation_string",
+            "named": true
+          },
+          {
             "type": "string",
             "named": true
           },
@@ -394,6 +406,10 @@
             "named": true
           },
           {
+            "type": "quoted_continuation_string",
+            "named": true
+          },
+          {
             "type": "string",
             "named": true
           },
@@ -480,6 +496,10 @@
             "named": true
           },
           {
+            "type": "quoted_continuation_string",
+            "named": true
+          },
+          {
             "type": "string",
             "named": true
           },
@@ -537,6 +557,10 @@
         },
         {
           "type": "comment",
+          "named": true
+        },
+        {
+          "type": "continuation_assignment_expression",
           "named": true
         },
         {
@@ -624,6 +648,10 @@
           "named": true
         },
         {
+          "type": "legacy_assignment_expression",
+          "named": true
+        },
+        {
           "type": "loop_statement",
           "named": true
         },
@@ -641,6 +669,10 @@
         },
         {
           "type": "operator",
+          "named": true
+        },
+        {
+          "type": "quoted_continuation_string",
           "named": true
         },
         {
@@ -753,6 +785,10 @@
             "named": true
           },
           {
+            "type": "quoted_continuation_string",
+            "named": true
+          },
+          {
             "type": "string",
             "named": true
           },
@@ -803,10 +839,6 @@
             "named": true
           },
           {
-            "type": "block_comment",
-            "named": true
-          },
-          {
             "type": "boolean",
             "named": true
           },
@@ -819,15 +851,11 @@
             "named": true
           },
           {
-            "type": "comment",
+            "type": "continuation_assignment_expression",
             "named": true
           },
           {
             "type": "directive",
-            "named": true
-          },
-          {
-            "type": "doc_comment",
             "named": true
           },
           {
@@ -907,6 +935,10 @@
             "named": true
           },
           {
+            "type": "legacy_assignment_expression",
+            "named": true
+          },
+          {
             "type": "loop_statement",
             "named": true
           },
@@ -924,6 +956,10 @@
           },
           {
             "type": "operator",
+            "named": true
+          },
+          {
+            "type": "quoted_continuation_string",
             "named": true
           },
           {
@@ -1118,6 +1154,10 @@
             "named": true
           },
           {
+            "type": "quoted_continuation_string",
+            "named": true
+          },
+          {
             "type": "string",
             "named": true
           },
@@ -1145,6 +1185,16 @@
     "type": "command",
     "named": true,
     "fields": {
+      "arguments": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "force_expression",
+            "named": true
+          }
+        ]
+      },
       "name": {
         "multiple": false,
         "required": true,
@@ -1175,6 +1225,10 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "command_continuation_section",
+          "named": true
+        },
         {
           "type": "drive_letter",
           "named": true
@@ -1216,6 +1270,10 @@
           "named": true
         },
         {
+          "type": "path_wildcard",
+          "named": true
+        },
+        {
           "type": "string",
           "named": true
         },
@@ -1227,9 +1285,19 @@
     }
   },
   {
-    "type": "comment",
+    "type": "command_continuation_section",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "continuation_section",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "concatenation_expression",
@@ -1268,6 +1336,70 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "continuation_assignment_expression",
+    "named": true,
+    "fields": {
+      "left": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "index_expression",
+            "named": true
+          },
+          {
+            "type": "member_expression",
+            "named": true
+          }
+        ]
+      },
+      "operator": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "*=",
+            "named": false
+          },
+          {
+            "type": "+=",
+            "named": false
+          },
+          {
+            "type": "-=",
+            "named": false
+          },
+          {
+            "type": ".=",
+            "named": false
+          },
+          {
+            "type": "/=",
+            "named": false
+          },
+          {
+            "type": ":=",
+            "named": false
+          }
+        ]
+      },
+      "right": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "continuation_section",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -1333,10 +1465,6 @@
           "named": true
         },
         {
-          "type": "block_comment",
-          "named": true
-        },
-        {
           "type": "boolean",
           "named": true
         },
@@ -1349,15 +1477,11 @@
           "named": true
         },
         {
-          "type": "comment",
+          "type": "continuation_assignment_expression",
           "named": true
         },
         {
           "type": "directive",
-          "named": true
-        },
-        {
-          "type": "doc_comment",
           "named": true
         },
         {
@@ -1437,6 +1561,10 @@
           "named": true
         },
         {
+          "type": "legacy_assignment_expression",
+          "named": true
+        },
+        {
           "type": "loop_statement",
           "named": true
         },
@@ -1454,6 +1582,10 @@
         },
         {
           "type": "operator",
+          "named": true
+        },
+        {
+          "type": "quoted_continuation_string",
           "named": true
         },
         {
@@ -1504,10 +1636,6 @@
             "named": true
           },
           {
-            "type": "block_comment",
-            "named": true
-          },
-          {
             "type": "boolean",
             "named": true
           },
@@ -1520,15 +1648,11 @@
             "named": true
           },
           {
-            "type": "comment",
+            "type": "continuation_assignment_expression",
             "named": true
           },
           {
             "type": "directive",
-            "named": true
-          },
-          {
-            "type": "doc_comment",
             "named": true
           },
           {
@@ -1608,6 +1732,10 @@
             "named": true
           },
           {
+            "type": "legacy_assignment_expression",
+            "named": true
+          },
+          {
             "type": "loop_statement",
             "named": true
           },
@@ -1625,6 +1753,10 @@
           },
           {
             "type": "operator",
+            "named": true
+          },
+          {
+            "type": "quoted_continuation_string",
             "named": true
           },
           {
@@ -1676,10 +1808,6 @@
             "named": true
           },
           {
-            "type": "block_comment",
-            "named": true
-          },
-          {
             "type": "boolean",
             "named": true
           },
@@ -1692,15 +1820,11 @@
             "named": true
           },
           {
-            "type": "comment",
+            "type": "continuation_assignment_expression",
             "named": true
           },
           {
             "type": "directive",
-            "named": true
-          },
-          {
-            "type": "doc_comment",
             "named": true
           },
           {
@@ -1780,6 +1904,10 @@
             "named": true
           },
           {
+            "type": "legacy_assignment_expression",
+            "named": true
+          },
+          {
             "type": "loop_statement",
             "named": true
           },
@@ -1797,6 +1925,10 @@
           },
           {
             "type": "operator",
+            "named": true
+          },
+          {
+            "type": "quoted_continuation_string",
             "named": true
           },
           {
@@ -1894,6 +2026,10 @@
             "named": true
           },
           {
+            "type": "quoted_continuation_string",
+            "named": true
+          },
+          {
             "type": "string",
             "named": true
           },
@@ -1938,6 +2074,45 @@
     }
   },
   {
+    "type": "force_concat_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "function_call",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "method_call",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "parenthesized_expression",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        },
+        {
+          "type": "variable_ref",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "force_expression",
     "named": true,
     "fields": {},
@@ -1967,6 +2142,10 @@
         },
         {
           "type": "concatenation_expression",
+          "named": true
+        },
+        {
+          "type": "force_concat_expression",
           "named": true
         },
         {
@@ -2007,6 +2186,10 @@
         },
         {
           "type": "parenthesized_expression",
+          "named": true
+        },
+        {
+          "type": "quoted_continuation_string",
           "named": true
         },
         {
@@ -2377,6 +2560,10 @@
             "named": true
           },
           {
+            "type": "quoted_continuation_string",
+            "named": true
+          },
+          {
             "type": "string",
             "named": true
           },
@@ -2423,11 +2610,19 @@
         "required": true,
         "types": [
           {
+            "type": "!",
+            "named": false
+          },
+          {
             "type": "&&",
             "named": false
           },
           {
             "type": "and",
+            "named": false
+          },
+          {
+            "type": "not",
             "named": false
           },
           {
@@ -2440,6 +2635,10 @@
           },
           {
             "type": "||",
+            "named": false
+          },
+          {
+            "type": "~",
             "named": false
           }
         ]
@@ -2457,10 +2656,6 @@
             "named": true
           },
           {
-            "type": "block_comment",
-            "named": true
-          },
-          {
             "type": "boolean",
             "named": true
           },
@@ -2473,15 +2668,11 @@
             "named": true
           },
           {
-            "type": "comment",
+            "type": "continuation_assignment_expression",
             "named": true
           },
           {
             "type": "directive",
-            "named": true
-          },
-          {
-            "type": "doc_comment",
             "named": true
           },
           {
@@ -2561,6 +2752,10 @@
             "named": true
           },
           {
+            "type": "legacy_assignment_expression",
+            "named": true
+          },
+          {
             "type": "loop_statement",
             "named": true
           },
@@ -2578,6 +2773,10 @@
           },
           {
             "type": "operator",
+            "named": true
+          },
+          {
+            "type": "quoted_continuation_string",
             "named": true
           },
           {
@@ -2747,6 +2946,10 @@
             "named": true
           },
           {
+            "type": "quoted_continuation_string",
+            "named": true
+          },
+          {
             "type": "string",
             "named": true
           },
@@ -2818,6 +3021,42 @@
     }
   },
   {
+    "type": "legacy_assignment_expression",
+    "named": true,
+    "fields": {
+      "left": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "operator": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "=",
+            "named": false
+          }
+        ]
+      },
+      "right": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "continuation_section",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "loop_statement",
     "named": true,
     "fields": {
@@ -2844,10 +3083,6 @@
             "named": true
           },
           {
-            "type": "block_comment",
-            "named": true
-          },
-          {
             "type": "boolean",
             "named": true
           },
@@ -2860,15 +3095,11 @@
             "named": true
           },
           {
-            "type": "comment",
+            "type": "continuation_assignment_expression",
             "named": true
           },
           {
             "type": "directive",
-            "named": true
-          },
-          {
-            "type": "doc_comment",
             "named": true
           },
           {
@@ -2948,6 +3179,10 @@
             "named": true
           },
           {
+            "type": "legacy_assignment_expression",
+            "named": true
+          },
+          {
             "type": "loop_statement",
             "named": true
           },
@@ -2965,6 +3200,10 @@
           },
           {
             "type": "operator",
+            "named": true
+          },
+          {
+            "type": "quoted_continuation_string",
             "named": true
           },
           {
@@ -3291,6 +3530,10 @@
             "named": true
           },
           {
+            "type": "quoted_continuation_string",
+            "named": true
+          },
+          {
             "type": "string",
             "named": true
           },
@@ -3385,6 +3628,10 @@
           },
           {
             "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "quoted_continuation_string",
             "named": true
           },
           {
@@ -3515,6 +3762,10 @@
           "named": true
         },
         {
+          "type": "quoted_continuation_string",
+          "named": true
+        },
+        {
           "type": "string",
           "named": true
         },
@@ -3606,6 +3857,10 @@
           "named": true
         },
         {
+          "type": "quoted_continuation_string",
+          "named": true
+        },
+        {
           "type": "string",
           "named": true
         },
@@ -3663,6 +3918,10 @@
         },
         {
           "type": "comment",
+          "named": true
+        },
+        {
+          "type": "continuation_assignment_expression",
           "named": true
         },
         {
@@ -3750,6 +4009,10 @@
           "named": true
         },
         {
+          "type": "legacy_assignment_expression",
+          "named": true
+        },
+        {
           "type": "loop_statement",
           "named": true
         },
@@ -3767,6 +4030,10 @@
         },
         {
           "type": "operator",
+          "named": true
+        },
+        {
+          "type": "quoted_continuation_string",
           "named": true
         },
         {
@@ -3895,6 +4162,10 @@
             "named": true
           },
           {
+            "type": "quoted_continuation_string",
+            "named": true
+          },
+          {
             "type": "string",
             "named": true
           },
@@ -3938,7 +4209,7 @@
     "fields": {
       "alternative": {
         "multiple": true,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "array_literal",
@@ -3998,6 +4269,10 @@
           },
           {
             "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "quoted_continuation_string",
             "named": true
           },
           {
@@ -4087,6 +4362,10 @@
             "named": true
           },
           {
+            "type": "quoted_continuation_string",
+            "named": true
+          },
+          {
             "type": "string",
             "named": true
           },
@@ -4173,6 +4452,10 @@
             "named": true
           },
           {
+            "type": "quoted_continuation_string",
+            "named": true
+          },
+          {
             "type": "string",
             "named": true
           },
@@ -4230,6 +4513,10 @@
           },
           {
             "type": "comment",
+            "named": true
+          },
+          {
+            "type": "continuation_assignment_expression",
             "named": true
           },
           {
@@ -4317,6 +4604,10 @@
             "named": true
           },
           {
+            "type": "legacy_assignment_expression",
+            "named": true
+          },
+          {
             "type": "loop_statement",
             "named": true
           },
@@ -4334,6 +4625,10 @@
           },
           {
             "type": "operator",
+            "named": true
+          },
+          {
+            "type": "quoted_continuation_string",
             "named": true
           },
           {
@@ -4451,6 +4746,10 @@
           "named": true
         },
         {
+          "type": "quoted_continuation_string",
+          "named": true
+        },
+        {
           "type": "string",
           "named": true
         },
@@ -4505,10 +4804,6 @@
             "named": true
           },
           {
-            "type": "block_comment",
-            "named": true
-          },
-          {
             "type": "boolean",
             "named": true
           },
@@ -4521,15 +4816,11 @@
             "named": true
           },
           {
-            "type": "comment",
+            "type": "continuation_assignment_expression",
             "named": true
           },
           {
             "type": "directive",
-            "named": true
-          },
-          {
-            "type": "doc_comment",
             "named": true
           },
           {
@@ -4609,6 +4900,10 @@
             "named": true
           },
           {
+            "type": "legacy_assignment_expression",
+            "named": true
+          },
+          {
             "type": "loop_statement",
             "named": true
           },
@@ -4626,6 +4921,10 @@
           },
           {
             "type": "operator",
+            "named": true
+          },
+          {
+            "type": "quoted_continuation_string",
             "named": true
           },
           {
@@ -4659,12 +4958,24 @@
         ]
       },
       "condition": {
-        "multiple": false,
+        "multiple": true,
         "required": true,
         "types": [
           {
+            "type": "!",
+            "named": false
+          },
+          {
+            "type": "not",
+            "named": false
+          },
+          {
             "type": "parenthesized_expression",
             "named": true
+          },
+          {
+            "type": "~",
+            "named": false
           }
         ]
       }
@@ -4680,6 +4991,10 @@
   },
   {
     "type": "\"",
+    "named": false
+  },
+  {
+    "type": "\"\"",
     "named": false
   },
   {
@@ -4703,6 +5018,10 @@
     "named": false
   },
   {
+    "type": "''",
+    "named": false
+  },
+  {
     "type": "(",
     "named": false
   },
@@ -4716,6 +5035,10 @@
   },
   {
     "type": "**",
+    "named": false
+  },
+  {
+    "type": "*/",
     "named": false
   },
   {
@@ -4780,10 +5103,6 @@
   },
   {
     "type": ":=",
-    "named": false
-  },
-  {
-    "type": ";",
     "named": false
   },
   {
@@ -4863,6 +5182,10 @@
     "named": false
   },
   {
+    "type": "comment",
+    "named": true
+  },
+  {
     "type": "continuation_section",
     "named": true
   },
@@ -4896,10 +5219,6 @@
   },
   {
     "type": "false",
-    "named": false
-  },
-  {
-    "type": "files",
     "named": false
   },
   {
@@ -4967,10 +5286,6 @@
     "named": false
   },
   {
-    "type": "loop",
-    "named": false
-  },
-  {
     "type": "loop_arguments",
     "named": true
   },
@@ -4991,16 +5306,12 @@
     "named": true
   },
   {
-    "type": "parse",
-    "named": false
+    "type": "path_wildcard",
+    "named": true
   },
   {
-    "type": "read",
-    "named": false
-  },
-  {
-    "type": "reg",
-    "named": false
+    "type": "quoted_continuation_string",
+    "named": true
   },
   {
     "type": "return",

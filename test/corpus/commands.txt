@@ -546,8 +546,9 @@ Send, % GetValue()
     (command_arguments
       (force_expression
         (force_expr_start)
-        (function_call
-          name: (identifier))))))
+        (force_concat_expression
+          (function_call
+            name: (identifier)))))))
 
 ================================================================================
 Force expression in multi-argument command
@@ -566,7 +567,8 @@ Gui, Add, Text, vMyText, % "test"
       (identifier)
       (force_expression
         (force_expr_start)
-        (string)))))
+        (force_concat_expression
+          (string))))))
 
 ================================================================================
 Empty argument (double comma) with force expression
@@ -642,7 +644,8 @@ myFunc() {
           (command_arguments
             (force_expression
               (force_expr_start)
-              (string)))))))
+              (force_concat_expression
+                (string))))))))
   (function_definition
     name: (identifier)
     body: (block
@@ -702,3 +705,40 @@ msg := LANGUAGE
   (assignment_expression
     left: (identifier)
     right: (identifier)))
+
+================================================================================
+Command with inline forced expression
+================================================================================
+
+Run % "*RunAs " (s:=A_IsCompiled ? "" : A_AhkPath " /r ") """" A_ScriptFullPath """" (s ? "" : " /r")
+MsgBox, Done
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (command
+    name: (identifier)
+    arguments: (force_expression
+      (force_expr_start)
+      (force_concat_expression
+        (string)
+        (parenthesized_expression
+          (assignment_expression
+            left: (identifier)
+            right: (ternary_expression
+              condition: (identifier)
+              consequence: (string)
+              alternative: (identifier)
+              alternative: (string))))
+        (string)
+        (identifier)
+        (string)
+        (parenthesized_expression
+          (ternary_expression
+            condition: (identifier)
+            consequence: (string)
+            alternative: (string))))))
+  (command
+    name: (identifier)
+    (command_arguments
+      (identifier))))

@@ -1,3 +1,9 @@
+const ci = word => new RegExp(word.split('').map(ch => {
+  const lower = ch.toLowerCase();
+  const upper = ch.toUpperCase();
+  return lower === upper ? ch : `[${lower}${upper}]`;
+}).join(''));
+
 module.exports = grammar({
   name: 'autohotkey',
 
@@ -12,9 +18,10 @@ module.exports = grammar({
     [$.parameter, $._argument_rhs, $.assignment_expression],  // func(x := val) could be def param, arg assignment, or regular assignment
     [$.variable_ref, $.operator],
     [$.variable_ref, $._expression],   // %var% in expressions
-    [$.loop_statement, $._statement],  // loop identifier: count vs braceless body
-    [$.catch_clause, $._statement],    // catch identifier: exception vs braceless body
-    [$.else_clause, $._statement],     // else if_statement: else body vs separate statement
+    [$.loop_statement, $._statement_core],  // loop identifier: count vs braceless body
+    [$.catch_clause, $._statement_core],    // catch identifier: exception vs braceless body
+    [$.else_clause, $._statement_core],     // else if_statement: else body vs separate statement
+    [$.if_statement, $.operator],
     [$._if_directive_condition, $._expression],  // parenthesized_expression in both
     [$._if_directive_condition, $._expression, $._concat_element],  // 3-way conflict for #if
     [$._expression, $._concat_element],  // shared expression types
@@ -35,6 +42,10 @@ module.exports = grammar({
       $.comment,
       $.doc_comment,
       $.block_comment,
+      $._statement_core,
+    ),
+
+    _statement_core: $ => choice(
       $.if_directive,      // Before directive - conditional #if
       $.if_win_directive,  // Before directive - conditional #IfWin*
       $.directive,
@@ -45,7 +56,7 @@ module.exports = grammar({
       $.gui_options,        // Before label - matches "GuiName:+/-Option" patterns like "MyGui:-Caption"
       $.gui_options_spaced, // Before label - matches "GuiName: +/-Option" patterns with space
       $.gui_target,   // Before label - matches "GuiName:," to prevent false labels in injection
-      $.drive_letter, // Before label - matches "X:" drive letters to prevent false labels
+      $.drive_letter, // Before label for uppercase drive-letter references like "C:"
       $.label,
       $.class_definition,
       $.function_definition,
@@ -58,6 +69,8 @@ module.exports = grammar({
       $.switch_statement,
       $.return_statement,
       // Expressions that can appear at statement level
+      $.continuation_assignment_expression,
+      $.legacy_assignment_expression,
       $.assignment_expression,
       $.method_call,
       $.member_expression,
@@ -66,6 +79,7 @@ module.exports = grammar({
       $.if_command,  // Before command - matches identifier, args with block + else
       $.command,
       $.array_literal,
+      $.quoted_continuation_string,
       $.string,
       $.number,
       $.boolean,
@@ -81,22 +95,28 @@ module.exports = grammar({
       $._punctuation,
     ),
 
-    comment: $ => seq(
+    doc_comment: $ => prec(102, seq(
+      '/**',
+      repeat(choice(
+        /[^*]+/,
+        /\*+[^/*]/
+      )),
+      '*/'
+    )),
+
+    comment: $ => token(seq(
       ';',
       /.*/
-    ),
+    )),
 
-    block_comment: $ => seq(
+    block_comment: $ => prec(101, seq(
       '/*',
-      /[^*]*\*+([^/*][^*]*\*+)*/,
-      '/'
-    ),
-
-    doc_comment: $ => seq(
-      '/**',
-      /[^*]*\*+([^/*][^*]*\*+)*/,
-      '/'
-    ),
+      repeat(choice(
+        /[^*]+/,
+        /\*+[^/*]/
+      )),
+      '*/'
+    )),
 
     // Generic directive: #Name args (for #Include, #SingleInstance, etc.)
     // Conditional directives (#if, #ifWin*) have dedicated rules with higher precedence
@@ -237,10 +257,10 @@ module.exports = grammar({
     )),
 
     // Drive letter reference (like "C:" in DriveGet commands)
-    // Single token pattern - precedence must be < hotkey (5) so "a::" parses as hotkey
+    // Single token pattern - lower precedence than identifiers so "s:=" parses as assignment.
     // This prevents "C:" from being parsed as a label during injection
     // Note: won't match "x:=" because := is tokenized as a unit (operator)
-    drive_letter: $ => token(prec(4, /[A-Za-z]:/)),
+    drive_letter: $ => token(prec(-1, /[A-Z]:/)),
 
     // GUI option flag (like +Caption or -Border) - standalone options in command arguments
     // Single token with high precedence to win over operator + identifier
@@ -259,10 +279,19 @@ module.exports = grammar({
     if_statement: $ => prec.right(seq(
       'if',
       field('condition', seq(
-        $.parenthesized_expression,
-        repeat(seq(choice('&&', '||', 'and', 'or'), $.parenthesized_expression))
+        choice(
+          $.parenthesized_expression,
+          seq(choice('!', 'not', '~'), $.parenthesized_expression)
+        ),
+        repeat(seq(
+          choice('&&', '||', 'and', 'or'),
+          choice(
+            $.parenthesized_expression,
+            seq(choice('!', 'not', '~'), $.parenthesized_expression)
+          )
+        ))
       )),
-      field('consequence', choice($.statement_block, $._statement)),
+      field('consequence', choice($.statement_block, $._statement_core)),
       optional(field('alternative', $.else_clause))
     )),
 
@@ -281,17 +310,20 @@ module.exports = grammar({
 
     else_clause: $ => seq(
       'else',
-      choice($.if_statement, $.if_command, $.statement_block, $._statement)
+      choice($.if_statement, $.if_command, $.statement_block, $._statement_core)
     ),
 
     while_statement: $ => seq(
       'while',
-      field('condition', $.parenthesized_expression),
-      field('body', choice($.statement_block, $._statement))
+      field('condition', choice(
+        $.parenthesized_expression,
+        seq(choice('!', 'not', '~'), $.parenthesized_expression)
+      )),
+      field('body', choice($.statement_block, $._statement_core))
     ),
 
-    loop_statement: $ => prec.right(seq(
-      'loop',
+    loop_statement: $ => prec.right(3, seq(
+      ci('loop'),
       optional(choice(
         // Comma-style variant: loop, parse, ...
         seq(
@@ -302,10 +334,10 @@ module.exports = grammar({
         // Count-based: loop 10 or loop count
         field('count', choice($.number, $.identifier))
       )),
-      field('body', choice($.statement_block, $._statement))
+      field('body', choice($.statement_block, $._statement_core))
     )),
 
-    loop_type: $ => choice('parse', 'files', 'read', 'reg'),
+    loop_type: $ => choice(ci('parse'), ci('files'), ci('read'), ci('reg')),
 
     loop_arguments: $ => /[^\r\n{]+/,
 
@@ -315,7 +347,7 @@ module.exports = grammar({
       optional(seq(',', field('value', $.identifier))),
       'in',
       field('collection', $._expression),
-      field('body', choice($.statement_block, $._statement))
+      field('body', choice($.statement_block, $._statement_core))
     ),
 
     try_statement: $ => prec.right(seq(
@@ -328,12 +360,12 @@ module.exports = grammar({
     catch_clause: $ => seq(
       'catch',
       optional(field('exception', $.identifier)),
-      field('body', choice($.statement_block, $._statement))
+      field('body', choice($.statement_block, $._statement_core))
     ),
 
     finally_clause: $ => seq(
       'finally',
-      field('body', choice($.statement_block, $._statement))
+      field('body', choice($.statement_block, $._statement_core))
     ),
 
     switch_statement: $ => seq(
@@ -433,6 +465,12 @@ module.exports = grammar({
     // prec.right prefers consuming tokens as command_arguments vs separate statement
     // Uses _statement_end to terminate before next label/command on new line
     command: $ => prec.right(2, choice(
+      // Commands can omit the comma when the argument is a forced expression:
+      //   Run % "*RunAs " A_AhkPath
+      prec(20, seq(
+        field('name', $.identifier),
+        field('arguments', $.force_expression)
+      )),
       // Command terminated by statement_end (before next label/command)
       seq(
         field('name', $.identifier),
@@ -453,21 +491,23 @@ module.exports = grammar({
     // All patterns exclude \r\n to ensure command terminates at newline
     // prec.right prefers continuing repeat over ending command_arguments
     command_arguments: $ => prec.right(repeat1(choice(
+      $.command_continuation_section, // multiline command text with optional trailing args
       $.force_expression,      // % expr - FIRST so it wins over variable_ref
       $.variable_ref,          // %name% - variable references
       $.string,                // "text" - quoted strings
       $.number,                // 123 - numeric literals
       $.gui_action,            // MyGui:Add - GUI subcommands (no space)
       $.gui_action_spaced,     // MyGui: Add - GUI subcommands (with space)
-      $.gui_options,           // MyGui:-Caption - GUI options (no space)
+      $.gui_options,            // MyGui:-Caption - GUI options (no space)
       $.gui_options_spaced,    // MyGui: -Caption - GUI options (with space)
       $.gui_target,            // MyGui:, - GUI target reference
       $.gui_option_flag,       // +Caption -Border - standalone option flags
       $.drive_letter,          // C: - drive letter (for file paths)
       $.identifier,            // word - plain identifiers
+      alias(token(prec(100, '/*')), $.path_wildcard),  // file wildcard in paths, not a block comment
       ',',                     // comma separator
       /[ \t]+/,                // whitespace (not newline)
-      /[^a-zA-Z0-9_%,:" \t\r\n?+=\-*\/!&|<>^~]+/, // symbols except expression operators
+      /[^a-zA-Z0-9_%,:" \t\r\n?+=\-!&|<>^~]+/, // symbols except expression operators
     ))),
 
     // Variable reference: %var% syntax
@@ -480,8 +520,35 @@ module.exports = grammar({
     // This enables sub-expression highlighting by parsing structure instead of terminal token
     force_expression: $ => prec.right(15, seq(
       $.force_expr_start,      // External scanner token (visible for highlighting)
-      $._expression,            // Regular grammar expression parsing with child nodes!
+      choice(
+        $.force_concat_expression,
+        $._expression,
+      ),            // Regular grammar expression parsing with child nodes!
       $._force_expr_boundary,  // External scanner token
+    )),
+
+    // Concatenation-friendly force-expression body.
+    // This is used for command forms like:
+    //   Run % "*RunAs " (s:=...) Chr(34) A_ScriptFullPath ...
+    force_concat_expression: $ => prec.left(11, seq(
+      choice(
+        $.string,
+        $.number,
+        $.variable_ref,
+        $.function_call,
+        $.method_call,
+        $.identifier,
+        $.parenthesized_expression
+      ),
+      repeat(choice(
+        $.string,
+        $.number,
+        $.variable_ref,
+        $.function_call,
+        $.method_call,
+        $.identifier,
+        $.parenthesized_expression
+      ))
     )),
 
     parameter_list: $ => seq(
@@ -538,6 +605,7 @@ module.exports = grammar({
       $.assignment_expression,
       $.this_expression,
       $.base_expression,
+      $.quoted_continuation_string,
       $.string,
       $.number,
       $.boolean,
@@ -604,7 +672,7 @@ module.exports = grammar({
       '?',
       field('consequence', $._ternary_branch),
       ':',
-      field('alternative', $._ternary_branch)
+      optional(field('alternative', $._ternary_branch))
     )),
 
     // Binary expressions with operator precedence
@@ -652,12 +720,23 @@ module.exports = grammar({
       ')'
     )),
 
+    continuation_assignment_expression: $ => prec.right(2, seq(
+      field('left', choice($.identifier, $.member_expression, $.index_expression)),
+      field('operator', choice(':=', '+=', '-=', '*=', '/=', '.=')),
+      field('right', $.continuation_section)
+    )),
+
     // Assignment expression - prec(1) ensures higher precedence than identifier's prec(-1)
-    // continuation_section first in choice to match multiline parens before parenthesized_expression
     assignment_expression: $ => prec.right(1, seq(
       field('left', choice($.identifier, $.member_expression, $.index_expression)),
       field('operator', choice(':=', '+=', '-=', '*=', '/=', '.=')),
-      field('right', choice($.continuation_section, $._expression))
+      field('right', $._expression)
+    )),
+
+    legacy_assignment_expression: $ => prec.right(1, seq(
+      field('left', $.identifier),
+      field('operator', '='),
+      field('right', $.continuation_section)
     )),
 
     this_expression: $ => 'this',
@@ -700,11 +779,17 @@ module.exports = grammar({
     )),
 
     string: $ => choice(
-      seq('"', repeat(choice($.escape_sequence, /[^"`]+/)), '"'),
-      seq("'", repeat(choice($.escape_sequence, /[^'`]+/)), "'"),
+      seq('"', repeat(choice($.escape_sequence, token.immediate('""'), $._double_string_content)), token.immediate('"')),
+      seq("'", repeat(choice($.escape_sequence, token.immediate("''"), $._single_string_content)), token.immediate("'")),
     ),
 
-    escape_sequence: $ => token(seq(
+    quoted_continuation_string: $ => token(/"[ \t]*\r?\n[ \t]*\([^)\r\n]*\r?\n(?:[ \t]*[^ \t)\n][^\n]*\n|[ \t]*\n)*[ \t]*\)[ \t]*"/),
+
+    _double_string_content: $ => token.immediate(/[^"`\r\n]+/),
+
+    _single_string_content: $ => token.immediate(/[^'`\r\n]+/),
+
+    escape_sequence: $ => token.immediate(seq(
       '`',
       choice('n', 't', 'r', '`', '"', "'")
     )),
@@ -748,7 +833,7 @@ module.exports = grammar({
       '?',
     ),
 
-    identifier: $ => /[a-zA-Z_][a-zA-Z0-9_]*/,
+    identifier: $ => /[a-zA-Z_\u0080-\uFFFF][a-zA-Z0-9_\u0080-\uFFFF]*/,
 
     // Remaining punctuation - NOT parens/brackets/braces which have semantic meaning
     _punctuation: $ => /[.@$\\]+/,
@@ -759,6 +844,16 @@ module.exports = grammar({
     //   - Content lines: whitespace + non-whitespace-non-) + rest of line + newline
     //   - Empty lines: just whitespace + newline (or just newline)
     // The closing ) must be on its own line (whitespace + ))
-    continuation_section: $ => token(/\((?:[ \t]*[^ \t)\n][^\n]*\n|[ \t]*\n)+[ \t]*\)/),
+    // Continuation headers may include textual options like LTrim or Join`r`n,
+    // but should not consume regular multiline expressions such as ternaries.
+    continuation_section: $ => token(choice(
+      /\(\r?\n(?:[ \t]*[^ \t)\n][^\n]*\n|[ \t]*\n)*[ \t]*\)\r?\n/,
+      /\((?:[ \t]*(?:%|[A-Za-z]+|`.))+[ \t]*\r?\n(?:[ \t]*[^ \t)\n][^\n]*\n|[ \t]*\n)*[ \t]*\)\r?\n/,
+    )),
+
+    command_continuation_section: $ => alias(token(choice(
+      /\(\r?\n(?:[ \t]*[^ \t)\n][^\n]*\n|[ \t]*\n)*[ \t]*\)[ \t]*,[^\r\n]*\r?\n/,
+      /\(\r?\n(?:[ \t]*[^ \t)\n][^\n]*\n|[ \t]*\n)*[ \t]*\)\r?\n/,
+    )), $.continuation_section),
   }
 });

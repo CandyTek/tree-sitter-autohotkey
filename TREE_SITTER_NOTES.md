@@ -153,7 +153,7 @@ _concatenatable: $ => choice(
 
 ## Debugging Tips
 
-**Verify Zed grammar:** `cat grammars/autohotkey/grammar.js | grep "pattern"` (Zed clones from GitHub)
+**Verify Zed grammar:** inspect the committed `grammar.js` at the revision Zed loads, or query the Git checkout that matches `extension.toml`'s `rev`
 
 **Test incrementally:** Add rules in small batches (3-5 items), verify, repeat. Easier to isolate breakages.
 
@@ -164,7 +164,7 @@ _concatenatable: $ => choice(
 **Common causes:**
 1. **Invalid commit hash** - Use full 40-char hash in extension.toml (`git rev-parse <hash>`)
 2. **Grammar too complex** - Multiple `clang.exe` with GB memory usage. Split large `token()` rules.
-3. **Corrupted cache** - Delete `<project>/grammars/` and `%LOCALAPPDATA%\Zed\extensions\installed\autohotkey\`
+3. **Stale Zed checkout** - Reinstall the dev extension and clear the Zed extension cache under `%LOCALAPPDATA%\Zed\extensions\`
 
 **Zed cache (Windows):** `%LOCALAPPDATA%\Zed\` - logs, extensions, WASM SDK
 

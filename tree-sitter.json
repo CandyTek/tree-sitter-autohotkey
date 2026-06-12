@@ -6,8 +6,7 @@
       "scope": "source.ahk",
       "path": ".",
       "file-types": ["ahk"],
-      "highlights": "languages/autohotkey/highlights.scm",
-      "injections": "languages/autohotkey/injections.scm"
+      "highlights": "languages/autohotkey/highlights.scm"
     }
   ],
   "metadata": {

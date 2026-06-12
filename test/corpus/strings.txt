@@ -161,3 +161,36 @@ Show(a.b.c "\" x.y.z)
           object: (identifier)
           property: (identifier))
         property: (identifier)))))
+
+================================================================================
+Quoted continuation string assignment
+================================================================================
+
+text := "
+(
+  line one
+  line two
+)"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_expression
+    left: (identifier)
+    right: (quoted_continuation_string)))
+
+================================================================================
+Return quoted continuation string
+================================================================================
+
+return "
+(
+  line one
+  line two
+)"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (return_statement
+    (quoted_continuation_string)))

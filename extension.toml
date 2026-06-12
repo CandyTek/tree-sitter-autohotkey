@@ -1,14 +1,14 @@
 id = "autohotkey"
 name = "AutoHotkey"
-version = "2.0.1"
+version = "2.0.2"
 schema_version = 1
 authors = ["Alfredo Menezes"]
 description = "AutoHotkey v1 language support for Zed with debugging"
-repository = "https://github.com/alfredomtx/tree-sitter-autohotkey"
+repository = "https://github.com/CandyTek/tree-sitter-autohotkey"
 
 [grammars.autohotkey]
-repository = "https://github.com/alfredomtx/tree-sitter-autohotkey"
-rev = "d0f2bb5589c644ed199635c940938be6e2baba32"
+repository = "file:///I:/Github/tree-sitter-autohotkey"
+rev = "c2b04fb2a504d1336b70ca89c82f11156da0c059"
 path = "."
 
 [language_servers.autohotkey-lsp]

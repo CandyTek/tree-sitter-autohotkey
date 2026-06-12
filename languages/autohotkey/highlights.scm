@@ -8,6 +8,7 @@
 
 ; Strings
 (string) @string
+(quoted_continuation_string) @string
 
 ; Continuation sections - multiline string content
 (continuation_section) @string
@@ -285,6 +286,9 @@
 ; Force expression - % symbol highlighted, sub-expressions via their own rules
 (force_expr_start) @operator
 ; (identifiers, strings, operators, etc. inherit from expression highlighting)
+
+; File wildcards in command arguments
+(path_wildcard) @punctuation.special
 
 ; Built-in variables (via #match? - highlights identifiers matching A_* patterns)
 ; Script properties

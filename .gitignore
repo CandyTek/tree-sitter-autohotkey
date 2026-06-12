@@ -39,3 +39,4 @@ grammars/
 # Others
 target/
 nul
+/.zed
